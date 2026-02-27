@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Be Heard - Tug of War</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -13,207 +13,211 @@
             --red-team: #e74c3c;
             --font-main: 'Quicksand', sans-serif;
         }
-.person {
-    width: 80px;
-    height: 140px;
-    object-fit: contain;  /* giữ tỉ lệ ảnh, có thể đổi thành 'cover' nếu muốn cắt bớt */
-    filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1));
-    animation: float 2s infinite ease-in-out; /* giữ hiệu ứng bay nhẹ */
-}
-        /* Themes Backgrounds */
+
+        /* ===== RESET & GLOBAL ===== */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+        body { height: 100vh; overflow: hidden; transition: background 0.5s; }
+
+        /* ===== THEMES ===== */
         .theme-spring { background: #e1f5fe; --accent: #ff80ab; }
         .theme-summer { background: #fff9c4; --accent: #fbc02d; }
         .theme-autumn { background: #ffe0b2; --accent: #e64a19; }
         .theme-winter { background: #e3f2fd; --accent: #90caf9; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
-        body { height: 100vh; overflow: hidden; transition: background 0.5s; }
-
-        /* SETUP SCREEN */
-       #setup-screen {
-    position: fixed; 
-    inset: 0; 
-    z-index: 100;
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    /* Deep blue radial gradient for atmosphere */
-    background: radial-gradient(circle at center, #0a1931, #031383);
-    backdrop-filter: blur(12px);
-}
+        /* ===== SETUP SCREEN (giữ nguyên, chỉnh một chút cho mobile) ===== */
+        #setup-screen {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #0a1931, #031383);
+            backdrop-filter: blur(12px);
+            padding: 10px;
+        }
         .setup-card {
-            background: white; padding: 35px; border-radius: 40px;
-            width: 90%; max-width: 950px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+            background: white; padding: 25px; border-radius: 30px;
+            width: 100%; max-width: 950px; display: grid;
+            grid-template-columns: 1fr 1fr; gap: 20px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        h1 { 
+            grid-column: span 2; text-align: center; color: #031383;
+            font-size: clamp(2.2rem, 8vw, 3.2rem); font-weight: 800;
+            letter-spacing: -1px; text-transform: uppercase;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        textarea { height: 140px; border-radius: 20px; border: 3px solid #f0f2f5; padding: 12px; resize: none; font-size: 1rem; }
+        select, input[type="file"] { width: 100%; padding: 10px; border-radius: 15px; border: 2px solid #f0f2f5; }
+        .btn-start {
+            grid-column: span 2; padding: 18px; border: none; border-radius: 20px;
+            background: linear-gradient(135deg, #031383, #2575fc);
+            color: white; font-size: clamp(1.8rem, 6vw, 2.2rem); font-weight: 800;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 3px;
+            animation: pulse 2s infinite; transition: all 0.3s ease;
+        }
+        .btn-start:hover { filter: brightness(1.2); transform: translateY(-3px); animation-play-state: paused; }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(3, 19, 131, 0.7); }
+            70% { transform: scale(1.03); box-shadow: 0 0 0 20px rgba(3, 19, 131, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(3, 19, 131, 0); }
         }
 
-        /* H1 - Deep Navy Gradient */
-h1 { 
-    grid-column: span 2; 
-    text-align: center; 
-    color: #031383; 
-    font-size: 3.2rem; 
-    font-weight: 800;
-    letter-spacing: -1px;
-    text-transform: uppercase;
-}
-
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        textarea { height: 160px; border-radius: 20px; border: 3px solid #f0f2f5; padding: 15px; resize: none; font-size: 1rem; outline: none; transition: 0.3s; }
-        textarea:focus { border-color: var(--blue-team); }
-        
-        select, input[type="file"] { width: 100%; padding: 12px; border-radius: 15px; border: 2px solid #f0f2f5; background: #fff; cursor: pointer; }
-
-        /* THE START BUTTON - Pulse & Navy Gradient */
-.btn-start {
-    grid-column: span 2; 
-    padding: 22px; 
-    border: none; 
-    border-radius: 20px;
-    /* Gradient from your theme color to a slightly lighter blue for depth */
-    background: linear-gradient(135deg, #031383, #2575fc);
-    color: white; 
-    font-size: 2.2rem; 
-    font-weight: 800; 
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    
-    /* APPLY PULSE ANIMATION */
-    animation: pulse 2s infinite;
-    transition: all 0.3s ease;
-}
-        .btn-start:hover { 
-    filter: brightness(1.2);
-    transform: translateY(-3px);
-    /* Pause the pulse on hover for better control */
-    animation-play-state: paused; 
-}
-
-/* THE PULSE KEYFRAMES */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(3, 19, 131, 0.7);
-    }
-    70% {
-        transform: scale(1.03);
-        /* Creates the expanding glow effect */
-        box-shadow: 0 0 0 20px rgba(3, 19, 131, 0);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(3, 19, 131, 0);
-    }
-}
-
-        /* GAME SCREEN */
-        #game-screen { display: none; height: 100vh; flex-direction: column; padding: 15px; position: relative; }
+        /* ===== GAME SCREEN ===== */
+        #game-screen {
+            display: none; height: 100vh; flex-direction: column;
+            padding: 10px; position: relative;
+        }
 
         .game-header {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
-            padding: 10px 40px; border-radius: 100px; margin-bottom: 20px;
+            padding: 10px 20px; border-radius: 50px; margin-bottom: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .timer { font-size: clamp(1.8rem, 6vw, 2.5rem); font-weight: 700; color: #2c3e50; }
+        #season-icon { font-size: clamp(2rem, 5vw, 2.5rem); }
+        .controls button {
+            padding: 8px 16px; border-radius: 50px; border: none;
+            font-weight: 700; font-size: 1rem; cursor: pointer;
         }
 
-        .timer { font-size: 2.5rem; font-weight: 700; color: #2c3e50; }
-
-        .battle-area { flex: 1; display: grid; grid-template-columns: 1fr 450px 1fr; gap: 20px; height: 75%; }
+        /* BATTLE AREA - Responsive Grid */
+        .battle-area {
+            flex: 1; display: grid;
+            grid-template-columns: 1fr minmax(200px, 450px) 1fr;
+            gap: 10px; height: 80%; min-height: 0; /* important for flex children */
+        }
 
         /* TEAM PANELS */
         .team-panel {
-            background: rgba(255, 255, 255, 0.7); border-radius: 35px; padding: 25px;
-            display: flex; flex-direction: column; gap: 15px; position: relative;
-            transition: 0.4s; border: 6px solid transparent;
+            background: rgba(255, 255, 255, 0.7); border-radius: 25px;
+            padding: 15px 10px; display: flex; flex-direction: column;
+            gap: 10px; position: relative; transition: 0.4s;
+            border: 4px solid transparent; backdrop-filter: blur(4px);
+            min-height: 0; /* allow shrinking */
         }
         .blue-side { border-color: var(--blue-team); }
         .red-side { border-color: var(--red-team); }
 
-        .score-box { font-size: 1.8rem; font-weight: 700; color: white; background: #2c3e50; padding: 5px 25px; border-radius: 20px; }
+        .score-box {
+            font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 700;
+            color: white; background: #2c3e50; padding: 5px 20px;
+            border-radius: 30px; white-space: nowrap;
+        }
 
         .question-card {
-            background: white; flex: 1; border-radius: 25px;
+            background: white; flex: 1; border-radius: 20px;
             display: flex; align-items: center; justify-content: center;
-            text-align: center; font-size: 2.4rem; font-weight: 700; padding: 20px;
-            color: #34495e; box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+            text-align: center; font-size: clamp(1.4rem, 4vw, 2.4rem);
+            font-weight: 700; padding: 15px 10px; color: #34495e;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+            word-break: break-word;
         }
 
-        .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-ans {
-            padding: 18px; border: none; border-radius: 20px; background: white;
-            font-size: 1.3rem; font-weight: 700; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 6px 0 #dfe6e9; color: #2c3e50;
+        .answer-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-top: 5px;
         }
-        .btn-ans:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #dfe6e9; background: #f8f9fa; }
-        .btn-ans:active { transform: translateY(2px); box-shadow: 0 2px 0 #dfe6e9; }
+        .btn-ans {
+            padding: 12px 5px; border: none; border-radius: 15px;
+            background: white; font-size: clamp(1rem, 3.5vw, 1.3rem);
+            font-weight: 700; cursor: pointer; transition: 0.1s;
+            box-shadow: 0 4px 0 #dfe6e9; color: #2c3e50;
+            touch-action: manipulation; /* cải thiện cảm ứng */
+            word-break: break-word;
+        }
+        .btn-ans:active { transform: translateY(4px); box-shadow: none; }
 
         /* TUG OF WAR VISUALS */
-        .rope-zone { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #rope-wrapper {
-            position: relative; width: 1400px; display: flex; align-items: center;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .rope-zone {
+            position: relative; display: flex; align-items: center;
+            justify-content: center; overflow: hidden;
+            height: 100%; min-height: 200px;
         }
-        .rope-line { 
-    height: 12px; /* Độ dày vừa phải, trông mảnh và hiện đại */
-    width: 500%;  /* Làm dây dài gấp đôi để khi kéo không bị lộ đầu dây */
-    position: absolute;
-    left: -50%;   /* Căn giữa lại dây sau khi kéo dài */
-    
-    /* Tạo vân dây thừng xoắn */
-    background: repeating-linear-gradient(
-        45deg,
-        #a67c52,
-        #a67c52 10px,
-        #8b5a2b 10px,
-        #8b5a2b 20px
-    );
-    border-radius: 10px; 
-    border: 1px solid #5d2e00;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2); /* Tạo độ nổi khối */
-}
+        #rope-wrapper {
+            position: relative; width: 100%; display: flex;
+            align-items: center; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-origin: center;
+        }
+        .rope-line {
+            height: 10px; width: 200%; /* dây dài để kéo không lộ đầu */
+            position: absolute; left: -50%;
+            background: repeating-linear-gradient(45deg, #a67c52, #a67c52 10px, #8b5a2b 10px, #8b5a2b 20px);
+            border-radius: 10px; border: 1px solid #5d2e00;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        .rope-center-mark {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            width: 12px; height: 30px; background: #ff4757;
+            border-radius: 2px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
 
-/* Sửa lại ruy băng đỏ cho nhỏ gọn, bám sát dây */
-.rope-center-mark { 
-    position: absolute; 
-    left: 50%; 
-    transform: translateX(-50%); 
-    width: 12px; 
-    height: 35px; 
-    background: #ff4757; 
-    border-radius: 2px; 
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
+        /* CHARACTERS - responsive size and position */
+        .team-chars {
+            position: absolute; display: flex; gap: 0px;
+            top: -120px; /* điều chỉnh theo màn hình */
+            align-items: flex-end;
+        }
+        .chars-blue { right: 50%; transform: translateX(30%); }
+        .chars-red { left: 50%; transform: translateX(-30%); }
 
-        /* CHARACTERS */
-        .team-chars { position: absolute; display: flex; gap: 0px; top: -215px; }
-        .chars-blue { right: 50%; }
-        .chars-red { left: 50%; }
-
-        .person { width: 200px; height: 300px; }
+        .person {
+            width: clamp(60px, 15vw, 200px);
+            height: clamp(100px, 25vw, 300px);
+            object-fit: contain; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1));
+            animation: float 2s infinite ease-in-out;
+        }
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);} }
 
         /* FREEZE EFFECT */
         .is-frozen { filter: saturate(0) blur(3px); pointer-events: none; }
         .freeze-overlay {
-            position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
-            font-size: 3.5rem; color: #fff; text-shadow: 0 0 15px #74b9ff; z-index: 100; font-weight: 700;
+            position: absolute; inset: 0; display: none;
+            align-items: center; justify-content: center;
+            font-size: 3rem; color: #fff; text-shadow: 0 0 15px #74b9ff;
+            z-index: 100; font-weight: 700; background: rgba(0,0,0,0.2);
+            border-radius: 25px;
         }
         .team-panel.frozen-active .freeze-overlay { display: flex; }
 
         /* WIN MODAL */
         #win-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; color: white;
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; color: white; padding: 20px;
+            text-align: center;
+        }
+        #win-text { font-size: clamp(3rem, 10vw, 5rem); margin-bottom: 30px; }
+
+        /* ===== MEDIA QUERIES cho tablet & mobile ===== */
+        @media (max-width: 768px) {
+            .battle-area {
+                grid-template-columns: 1fr 150px 1fr; /* thu nhỏ cột giữa */
+                gap: 5px;
+            }
+            .team-panel { padding: 10px 5px; }
+            .question-card { font-size: 1.2rem; padding: 10px 5px; }
+            .btn-ans { font-size: 0.9rem; padding: 10px 2px; }
+            .score-box { font-size: 1.1rem; padding: 3px 10px; }
+            .team-chars { top: -80px; }
+            .person { width: 50px; height: 90px; } /* thu nhỏ nhân vật */
         }
 
-        /* Animations */
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .person { animation: float 2s infinite ease-in-out; }
+        @media (max-width: 480px) {
+            .game-header { padding: 8px 12px; }
+            .timer { font-size: 1.5rem; }
+            .battle-area { grid-template-columns: 1fr 120px 1fr; }
+            .team-chars { top: -60px; }
+            .person { width: 40px; height: 70px; }
+            .freeze-overlay { font-size: 2rem; }
+            .btn-ans { font-size: 0.8rem; padding: 8px 2px; }
+        }
     </style>
 </head>
 <body class="theme-summer">
 
+    <!-- SETUP SCREEN -->
     <div id="setup-screen">
         <div class="setup-card">
             <h1>🏆 Tug of War</h1>
@@ -258,42 +262,44 @@ h1 {
         </div>
     </div>
 
+    <!-- GAME SCREEN -->
     <div id="game-screen">
         <div class="game-header">
             <div class="timer" id="timer-display">01:30</div>
             <div id="season-icon" style="font-size: 2.5rem;">☀️</div>
             <div class="controls">
-                <button onclick="toggleMute()" style="padding:10px 20px; border-radius: 50px; border:none; cursor:pointer; font-weight:700;">Loa: Bật</button>
+                <button onclick="toggleMute()" style="padding:8px 16px; border-radius: 50px; border:none; cursor:pointer; font-weight:700;">Loa: Bật</button>
             </div>
         </div>
 
         <div class="battle-area">
+            <!-- Team Blue Panel -->
             <div class="team-panel blue-side" id="panel-blue">
-                <div class="freeze-overlay">❄️ FREEZE </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700; color:var(--blue-team); font-size:1.5rem;">TEAM BLUE</span>
+                <div class="freeze-overlay">❄️ FREEZE</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
+                    <span style="font-weight:700; color:var(--blue-team); font-size:1.2rem;">BLUE</span>
                     <span class="score-box" id="score-blue">0</span>
                 </div>
                 <div class="question-card" id="q-blue">...</div>
                 <div class="answer-grid" id="ans-blue"></div>
             </div>
 
+            <!-- Rope Zone -->
             <div class="rope-zone">
                 <div id="rope-wrapper">
-                                     
                     <div class="rope-line"></div>
                     <div class="rope-center-mark"></div>
- <div class="team-chars chars-blue" id="chars-blue-group"></div>
-
+                    <div class="team-chars chars-blue" id="chars-blue-group"></div>
                     <div class="team-chars chars-red" id="chars-red-group"></div>
                 </div>
             </div>
 
+            <!-- Team Red Panel -->
             <div class="team-panel red-side" id="panel-red">
-                <div class="freeze-overlay">❄️ FREEZE </div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="freeze-overlay">❄️ FREEZE</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
                     <span class="score-box" id="score-red">0</span>
-                    <span style="font-weight:700; color:var(--red-team); font-size:1.5rem;">TEAM RED</span>
+                    <span style="font-weight:700; color:var(--red-team); font-size:1.2rem;">RED</span>
                 </div>
                 <div class="question-card" id="q-red">...</div>
                 <div class="answer-grid" id="ans-red"></div>
@@ -301,6 +307,7 @@ h1 {
         </div>
     </div>
 
+    <!-- WIN MODAL -->
     <div id="win-modal">
         <h2 id="win-text" style="font-size: 5rem; margin-bottom: 20px;">TEAM BLUE THẮNG!</h2>
         <button class="btn-start" style="width: 300px;" onclick="location.reload()">PLAY AGAIN</button>
@@ -318,7 +325,6 @@ h1 {
         };
         let gameConfig = { time: 90, winDist: 5 };
 
-        
         // Đọc file Docx
         document.getElementById('docx-upload').addEventListener('change', function(e) {
             const reader = new FileReader();
@@ -348,42 +354,29 @@ h1 {
             gameConfig.winDist = parseInt(document.getElementById('dist-select').value);
             const theme = document.getElementById('theme-select').value;
 
-            // UI Setup
             document.body.className = 'theme-' + theme;
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'flex';
-            
-            // Render Team Members with fixed PNG images
-const bGroup = document.getElementById('chars-blue-group');
-const rGroup = document.getElementById('chars-red-group');
 
-// Xóa nội dung cũ
-bGroup.innerHTML = '';
-rGroup.innerHTML = '';
-
-// Tạo 3 ảnh cho đội xanh (cùng một file)
-for (let i = 0; i < 3; i++) {
-    const img = document.createElement('img');
-    img.src = 'blue-team.png';    // Thay bằng tên file của bạn
-    img.alt = 'Blue team member';
-    img.className = 'person';
-    img.style.width = '250px';
-    img.style.height = '400px';
-    img.style.objectFit = 'contain';
-    bGroup.appendChild(img);
-}
-
-// Tạo 3 ảnh cho đội đỏ (cùng một file)
-for (let i = 0; i < 3; i++) {
-    const img = document.createElement('img');
-    img.src = 'red-team.png';     // Thay bằng tên file của bạn
-    img.alt = 'Red team member';
-    img.className = 'person';
-    img.style.width = '250px';
-    img.style.height = '400px';
-    img.style.objectFit = 'contain';
-    rGroup.appendChild(img);
-}
+            // Tạo nhân vật (dùng ảnh mặc định, có thể thay bằng file thật)
+            const bGroup = document.getElementById('chars-blue-group');
+            const rGroup = document.getElementById('chars-red-group');
+            bGroup.innerHTML = '';
+            rGroup.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const img = document.createElement('img');
+                img.src = 'blue-team.png';   // thay bằng file của bạn
+                img.alt = 'Blue';
+                img.className = 'person';
+                bGroup.appendChild(img);
+            }
+            for (let i = 0; i < 3; i++) {
+                const img = document.createElement('img');
+                img.src = 'red-team.png';    // thay bằng file của bạn
+                img.alt = 'Red';
+                img.className = 'person';
+                rGroup.appendChild(img);
+            }
 
             const bgm = document.getElementById('bgm');
             if(bgm.src) bgm.play();
@@ -402,7 +395,17 @@ for (let i = 0; i < 3; i++) {
                 s--;
                 let m = Math.floor(s/60), sec = s%60;
                 el.innerText = `${m}:${sec < 10 ? '0'+sec : sec}`;
-                if(s <= 0) finishGame("HÒA NHAU!");
+                if(s <= 0) {
+                    clearInterval(timer);
+                    // Xác định đội thắng dựa trên điểm số
+                    if (gameState.blueScore > gameState.redScore) {
+                        finishGame('blue');
+                    } else if (gameState.redScore > gameState.blueScore) {
+                        finishGame('red');
+                    } else {
+                        finishGame('draw');
+                    }
+                }
             }, 1000);
         }
 
@@ -450,7 +453,7 @@ for (let i = 0; i < 3; i++) {
                 updateRope();
                 
                 if(Math.abs(gameState.pullPos) >= gameConfig.winDist) {
-                    finishGame(gameState.pullPos < 0 ? "TEAM BLUE - WINNER!" : "TEAM RED - WINNER!");
+                    finishGame(gameState.pullPos < 0 ? 'blue' : 'red');
                 } else {
                     ask(team);
                 }
@@ -473,15 +476,25 @@ for (let i = 0; i < 3; i++) {
         }
 
         function updateRope() {
-            const moveX = gameState.pullPos * 70; // Di chuyển 70px mỗi bước
+            const moveX = gameState.pullPos * 70; // 70px mỗi bước
             document.getElementById('rope-wrapper').style.transform = `translateX(${moveX}px)`;
         }
 
-        function finishGame(msg) {
+        function finishGame(winner) {
             gameState.active = false;
-            document.getElementById('win-modal').style.display = 'flex';
-            document.getElementById('win-text').innerText = msg;
-            document.getElementById('win-text').style.color = gameState.pullPos < 0 ? '#3498db' : '#e74c3c';
+            const modal = document.getElementById('win-modal');
+            const winText = document.getElementById('win-text');
+            if (winner === 'blue') {
+                winText.innerText = '🏆 TEAM BLUE - WINNER! 🏆';
+                winText.style.color = '#3498db';
+            } else if (winner === 'red') {
+                winText.innerText = '🏆 TEAM RED - WINNER! 🏆';
+                winText.style.color = '#e74c3c';
+            } else {
+                winText.innerText = '🤝 IT'S A TIE! 🤝';
+                winText.style.color = '#ffffff';
+            }
+            modal.style.display = 'flex';
         }
 
         function toggleMute() {
