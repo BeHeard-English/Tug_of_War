@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be Heard - Tug of War</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --blue-team: #3498db;
+            --red-team: #e74c3c;
+            --font-main: 'Quicksand', sans-serif;
+        }
+.person {
+    width: 80px;
+    height: 140px;
+    object-fit: contain;  /* giữ tỉ lệ ảnh, có thể đổi thành 'cover' nếu muốn cắt bớt */
+    filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1));
+    animation: float 2s infinite ease-in-out; /* giữ hiệu ứng bay nhẹ */
+}
+        /* Themes Backgrounds */
+        .theme-spring { background: #e1f5fe; --accent: #ff80ab; }
+        .theme-summer { background: #fff9c4; --accent: #fbc02d; }
+        .theme-autumn { background: #ffe0b2; --accent: #e64a19; }
+        .theme-winter { background: #e3f2fd; --accent: #90caf9; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+        body { height: 100vh; overflow: hidden; transition: background 0.5s; }
+
+        /* SETUP SCREEN */
+       #setup-screen {
+    position: fixed; 
+    inset: 0; 
+    z-index: 100;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    /* Deep blue radial gradient for atmosphere */
+    background: radial-gradient(circle at center, #0a1931, #031383);
+    backdrop-filter: blur(12px);
+}
+        .setup-card {
+            background: white; padding: 35px; border-radius: 40px;
+            width: 90%; max-width: 950px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+
+        /* H1 - Deep Navy Gradient */
+h1 { 
+    grid-column: span 2; 
+    text-align: center; 
+    color: #031383; 
+    font-size: 3.2rem; 
+    font-weight: 800;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+}
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        textarea { height: 160px; border-radius: 20px; border: 3px solid #f0f2f5; padding: 15px; resize: none; font-size: 1rem; outline: none; transition: 0.3s; }
+        textarea:focus { border-color: var(--blue-team); }
+        
+        select, input[type="file"] { width: 100%; padding: 12px; border-radius: 15px; border: 2px solid #f0f2f5; background: #fff; cursor: pointer; }
+
+        /* THE START BUTTON - Pulse & Navy Gradient */
+.btn-start {
+    grid-column: span 2; 
+    padding: 22px; 
+    border: none; 
+    border-radius: 20px;
+    /* Gradient from your theme color to a slightly lighter blue for depth */
+    background: linear-gradient(135deg, #031383, #2575fc);
+    color: white; 
+    font-size: 2.2rem; 
+    font-weight: 800; 
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    
+    /* APPLY PULSE ANIMATION */
+    animation: pulse 2s infinite;
+    transition: all 0.3s ease;
+}
+        .btn-start:hover { 
+    filter: brightness(1.2);
+    transform: translateY(-3px);
+    /* Pause the pulse on hover for better control */
+    animation-play-state: paused; 
+}
+
+/* THE PULSE KEYFRAMES */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(3, 19, 131, 0.7);
+    }
+    70% {
+        transform: scale(1.03);
+        /* Creates the expanding glow effect */
+        box-shadow: 0 0 0 20px rgba(3, 19, 131, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(3, 19, 131, 0);
+    }
+}
+
+        /* GAME SCREEN */
+        #game-screen { display: none; height: 100vh; flex-direction: column; padding: 15px; position: relative; }
+
+        .game-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
+            padding: 10px 40px; border-radius: 100px; margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .timer { font-size: 2.5rem; font-weight: 700; color: #2c3e50; }
+
+        .battle-area { flex: 1; display: grid; grid-template-columns: 1fr 450px 1fr; gap: 20px; height: 75%; }
+
+        /* TEAM PANELS */
+        .team-panel {
+            background: rgba(255, 255, 255, 0.7); border-radius: 35px; padding: 25px;
+            display: flex; flex-direction: column; gap: 15px; position: relative;
+            transition: 0.4s; border: 6px solid transparent;
+        }
+        .blue-side { border-color: var(--blue-team); }
+        .red-side { border-color: var(--red-team); }
+
+        .score-box { font-size: 1.8rem; font-weight: 700; color: white; background: #2c3e50; padding: 5px 25px; border-radius: 20px; }
+
+        .question-card {
+            background: white; flex: 1; border-radius: 25px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; font-size: 2.4rem; font-weight: 700; padding: 20px;
+            color: #34495e; box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-ans {
+            padding: 18px; border: none; border-radius: 20px; background: white;
+            font-size: 1.3rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 6px 0 #dfe6e9; color: #2c3e50;
+        }
+        .btn-ans:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #dfe6e9; background: #f8f9fa; }
+        .btn-ans:active { transform: translateY(2px); box-shadow: 0 2px 0 #dfe6e9; }
+
+        /* TUG OF WAR VISUALS */
+        .rope-zone { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #rope-wrapper {
+            position: relative; width: 1400px; display: flex; align-items: center;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .rope-line { 
+    height: 12px; /* Độ dày vừa phải, trông mảnh và hiện đại */
+    width: 500%;  /* Làm dây dài gấp đôi để khi kéo không bị lộ đầu dây */
+    position: absolute;
+    left: -50%;   /* Căn giữa lại dây sau khi kéo dài */
+    
+    /* Tạo vân dây thừng xoắn */
+    background: repeating-linear-gradient(
+        45deg,
+        #a67c52,
+        #a67c52 10px,
+        #8b5a2b 10px,
+        #8b5a2b 20px
+    );
+    border-radius: 10px; 
+    border: 1px solid #5d2e00;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2); /* Tạo độ nổi khối */
+}
+
+/* Sửa lại ruy băng đỏ cho nhỏ gọn, bám sát dây */
+.rope-center-mark { 
+    position: absolute; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    width: 12px; 
+    height: 35px; 
+    background: #ff4757; 
+    border-radius: 2px; 
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+        /* CHARACTERS */
+        .team-chars { position: absolute; display: flex; gap: 0px; top: -215px; }
+        .chars-blue { right: 50%; }
+        .chars-red { left: 50%; }
+
+        .person { width: 200px; height: 300px; }
+
+        /* FREEZE EFFECT */
+        .is-frozen { filter: saturate(0) blur(3px); pointer-events: none; }
+        .freeze-overlay {
+            position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+            font-size: 3.5rem; color: #fff; text-shadow: 0 0 15px #74b9ff; z-index: 100; font-weight: 700;
+        }
+        .team-panel.frozen-active .freeze-overlay { display: flex; }
+
+        /* WIN MODAL */
+        #win-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
+            display: none; flex-direction: column; align-items: center; justify-content: center; color: white;
+        }
+
+        /* Animations */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .person { animation: float 2s infinite ease-in-out; }
+    </style>
+</head>
+<body class="theme-summer">
+
+    <div id="setup-screen">
+        <div class="setup-card">
+            <h1>🏆 Tug of War</h1>
+            <div class="input-group">
+                <label><b>Nhập từ vựng (Tiếng Anh: Tiếng Việt)</b></label>
+                <textarea id="vocab-input" placeholder="teacher: giáo viên&#10;student: học sinh&#10;school: trường học"></textarea>
+                <label><b>Hoặc tải file Word (.docx)</b></label>
+                <input type="file" id="docx-upload" accept=".docx">
+            </div>
+            <div class="settings">
+                <div style="margin-bottom: 15px;">
+                    <label>Thời gian chơi</label>
+                    <select id="time-select">
+                        <option value="60">60 Giây</option>
+                        <option value="90" selected>90 Giây</option>
+                        <option value="120">120 Giây</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Lượt kéo để thắng</label>
+                    <select id="dist-select">
+                        <option value="3">3 Lượt</option>
+                        <option value="5" selected>5 Lượt</option>
+                        <option value="7">7 Lượt</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Chủ đề mùa</label>
+                    <select id="theme-select">
+                        <option value="spring">Mùa Xuân 🌸</option>
+                        <option value="summer" selected>Mùa Hè ☀️</option>
+                        <option value="autumn">Mùa Thu 🍂</option>
+                        <option value="winter">Mùa Đông ❄️</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Nhạc nền (.mp3)</label>
+                    <input type="file" id="music-input" accept="audio/*">
+                </div>
+            </div>
+            <button class="btn-start" onclick="startGame()">LET'S PLAY</button>
+        </div>
+    </div>
+
+    <div id="game-screen">
+        <div class="game-header">
+            <div class="timer" id="timer-display">01:30</div>
+            <div id="season-icon" style="font-size: 2.5rem;">☀️</div>
+            <div class="controls">
+                <button onclick="toggleMute()" style="padding:10px 20px; border-radius: 50px; border:none; cursor:pointer; font-weight:700;">Loa: Bật</button>
+            </div>
+        </div>
+
+        <div class="battle-area">
+            <div class="team-panel blue-side" id="panel-blue">
+                <div class="freeze-overlay">❄️ FREEZE </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:var(--blue-team); font-size:1.5rem;">TEAM BLUE</span>
+                    <span class="score-box" id="score-blue">0</span>
+                </div>
+                <div class="question-card" id="q-blue">...</div>
+                <div class="answer-grid" id="ans-blue"></div>
+            </div>
+
+            <div class="rope-zone">
+                <div id="rope-wrapper">
+                                     
+                    <div class="rope-line"></div>
+                    <div class="rope-center-mark"></div>
+ <div class="team-chars chars-blue" id="chars-blue-group"></div>
+
+                    <div class="team-chars chars-red" id="chars-red-group"></div>
+                </div>
+            </div>
+
+            <div class="team-panel red-side" id="panel-red">
+                <div class="freeze-overlay">❄️ FREEZE </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="score-box" id="score-red">0</span>
+                    <span style="font-weight:700; color:var(--red-team); font-size:1.5rem;">TEAM RED</span>
+                </div>
+                <div class="question-card" id="q-red">...</div>
+                <div class="answer-grid" id="ans-red"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-modal">
+        <h2 id="win-text" style="font-size: 5rem; margin-bottom: 20px;">TEAM BLUE THẮNG!</h2>
+        <button class="btn-start" style="width: 300px;" onclick="location.reload()">PLAY AGAIN</button>
+    </div>
+
+    <audio id="bgm" loop></audio>
+
+    <script>
+        let vocab = [];
+        let gameState = {
+            blueScore: 0, redScore: 0, 
+            pullPos: 0, 
+            active: false,
+            blueFrozen: false, redFrozen: false
+        };
+        let gameConfig = { time: 90, winDist: 5 };
+
+        
+        // Đọc file Docx
+        document.getElementById('docx-upload').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                mammoth.extractRawText({arrayBuffer: event.target.result})
+                    .then(r => document.getElementById('vocab-input').value = r.value);
+            };
+            reader.readAsArrayBuffer(this.files[0]);
+        });
+
+        // Nhạc nền
+        document.getElementById('music-input').addEventListener('change', function(e) {
+            document.getElementById('bgm').src = URL.createObjectURL(this.files[0]);
+        });
+
+        function startGame() {
+            const text = document.getElementById('vocab-input').value;
+            const lines = text.split('\n').filter(l => l.includes(':'));
+            if (lines.length < 5) return alert("Vui lòng nhập ít nhất 5 từ vựng (Word: Nghĩa)");
+
+            vocab = lines.map(l => {
+                const p = l.split(':');
+                return { en: p[0].trim(), vi: p[1].trim() };
+            });
+
+            gameConfig.time = parseInt(document.getElementById('time-select').value);
+            gameConfig.winDist = parseInt(document.getElementById('dist-select').value);
+            const theme = document.getElementById('theme-select').value;
+
+            // UI Setup
+            document.body.className = 'theme-' + theme;
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            
+            // Render Team Members with fixed PNG images
+const bGroup = document.getElementById('chars-blue-group');
+const rGroup = document.getElementById('chars-red-group');
+
+// Xóa nội dung cũ
+bGroup.innerHTML = '';
+rGroup.innerHTML = '';
+
+// Tạo 3 ảnh cho đội xanh (cùng một file)
+for (let i = 0; i < 3; i++) {
+    const img = document.createElement('img');
+    img.src = 'blue-team.png';    // Thay bằng tên file của bạn
+    img.alt = 'Blue team member';
+    img.className = 'person';
+    img.style.width = '250px';
+    img.style.height = '400px';
+    img.style.objectFit = 'contain';
+    bGroup.appendChild(img);
+}
+
+// Tạo 3 ảnh cho đội đỏ (cùng một file)
+for (let i = 0; i < 3; i++) {
+    const img = document.createElement('img');
+    img.src = 'red-team.png';     // Thay bằng tên file của bạn
+    img.alt = 'Red team member';
+    img.className = 'person';
+    img.style.width = '250px';
+    img.style.height = '400px';
+    img.style.objectFit = 'contain';
+    rGroup.appendChild(img);
+}
+
+            const bgm = document.getElementById('bgm');
+            if(bgm.src) bgm.play();
+
+            gameState.active = true;
+            runTimer();
+            ask('blue');
+            ask('red');
+        }
+
+        function runTimer() {
+            let s = gameConfig.time;
+            const el = document.getElementById('timer-display');
+            const timer = setInterval(() => {
+                if(!gameState.active) return clearInterval(timer);
+                s--;
+                let m = Math.floor(s/60), sec = s%60;
+                el.innerText = `${m}:${sec < 10 ? '0'+sec : sec}`;
+                if(s <= 0) finishGame("HÒA NHAU!");
+            }, 1000);
+        }
+
+        function ask(team) {
+            if(!gameState.active) return;
+            const isBlue = team === 'blue';
+            if(isBlue ? gameState.blueFrozen : gameState.redFrozen) return;
+
+            const item = vocab[Math.floor(Math.random() * vocab.length)];
+            const isEn = Math.random() > 0.5;
+            const qText = isEn ? item.en : item.vi;
+            const correct = isEn ? item.vi : item.en;
+
+            document.getElementById(`q-${team}`).innerText = qText;
+            
+            let options = [correct];
+            while(options.length < 4) {
+                const r = vocab[Math.floor(Math.random() * vocab.length)];
+                const val = isEn ? r.vi : r.en;
+                if(!options.includes(val)) options.push(val);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById(`ans-${team}`);
+            grid.innerHTML = '';
+            options.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = 'btn-ans';
+                b.innerText = opt;
+                b.onclick = () => check(team, opt, correct);
+                grid.appendChild(b);
+            });
+        }
+
+        function check(team, selected, correct) {
+            if(selected === correct) {
+                if(team === 'blue') {
+                    gameState.blueScore++;
+                    gameState.pullPos--;
+                } else {
+                    gameState.redScore++;
+                    gameState.pullPos++;
+                }
+                document.getElementById(`score-${team}`).innerText = (team === 'blue' ? gameState.blueScore : gameState.redScore);
+                updateRope();
+                
+                if(Math.abs(gameState.pullPos) >= gameConfig.winDist) {
+                    finishGame(gameState.pullPos < 0 ? "TEAM BLUE - WINNER!" : "TEAM RED - WINNER!");
+                } else {
+                    ask(team);
+                }
+            } else {
+                freeze(team);
+            }
+        }
+
+        function freeze(team) {
+            const isBlue = team === 'blue';
+            const panel = document.getElementById(`panel-${team}`);
+            if(isBlue) gameState.blueFrozen = true; else gameState.redFrozen = true;
+            
+            panel.classList.add('is-frozen', 'frozen-active');
+            setTimeout(() => {
+                if(isBlue) gameState.blueFrozen = false; else gameState.redFrozen = false;
+                panel.classList.remove('is-frozen', 'frozen-active');
+                ask(team);
+            }, 3000);
+        }
+
+        function updateRope() {
+            const moveX = gameState.pullPos * 70; // Di chuyển 70px mỗi bước
+            document.getElementById('rope-wrapper').style.transform = `translateX(${moveX}px)`;
+        }
+
+        function finishGame(msg) {
+            gameState.active = false;
+            document.getElementById('win-modal').style.display = 'flex';
+            document.getElementById('win-text').innerText = msg;
+            document.getElementById('win-text').style.color = gameState.pullPos < 0 ? '#3498db' : '#e74c3c';
+        }
+
+        function toggleMute() {
+            const bgm = document.getElementById('bgm');
+            bgm.muted = !bgm.muted;
+            event.target.innerText = bgm.muted ? "Loa: Tắt" : "Loa: Bật";
+        }
+    </script>
+</body>
+</html>
