@@ -24,7 +24,18 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
         body { height: 100vh; overflow: hidden; transition: background 0.5s; display: flex; flex-direction: column; }
-
+.center-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px; /* Độ dày của vạch */
+    background: rgba(255, 255, 255, 0.3); /* Màu trắng mờ để hợp với mọi theme */
+    border-left: 2px dashed #2d3436; /* Đường đứt nét để nhìn giống vạch đích */
+    transform: translateX(-50%);
+    z-index: 1; /* Nằm trên nền nhưng dưới nhân vật */
+    pointer-events: none; /* Để không cản trở việc click chuột */
+}
         /* SETUP SCREEN (GIỮ NGUYÊN GIAO DIỆN CŨ) */
         #setup-screen {
             position: fixed; inset: 0; z-index: 1000;
@@ -99,9 +110,15 @@
         /* ROPE VISUALS */
         .rope-zone { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #rope-wrapper {
-            position: relative; width: 100%; display: flex; align-items: center;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* QUAN TRỌNG: Đặt z-index cao hơn center-line để nằm đè lên trên */
+    z-index: 10; 
+}
         .rope-line {
     /* Độ cao giảm xuống để dây mảnh hơn (từ 12px xuống 7px) */
     height: 10px; 
@@ -129,7 +146,17 @@
     /* Thêm một chút đổ bóng nhẹ để sợi dây có chiều sâu hơn trên nền màn hình */
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-        .rope-center-mark { position: absolute; left: 50%; transform: translateX(-50%); width: 12px; height: 40px; background: #ff4757; z-index: 10; }
+        .rope-center-mark {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15px; 
+    height: 45px; 
+    background: #ff4757; /* Màu đỏ rực */
+    z-index: 10;
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); /* Thêm hiệu ứng phát sáng */
+}
 
         .team-chars { position: absolute; display: flex; top: -75px; }
         .chars-blue { right: 50%; }
@@ -218,13 +245,15 @@
             </div>
 
             <div class="rope-zone">
-                <div id="rope-wrapper">
-                    <div class="rope-line"></div>
-                    <div class="rope-center-mark"></div>
-                    <div class="team-chars chars-blue" id="chars-blue-group"></div>
-                    <div class="team-chars chars-red" id="chars-red-group"></div>
-                </div>
-            </div>
+    <div class="center-line"></div> 
+
+    <div id="rope-wrapper">
+        <div class="rope-line"></div>
+        <div class="rope-center-mark"></div>
+        <div class="team-chars chars-blue" id="chars-blue-group"></div>
+        <div class="team-chars chars-red" id="chars-red-group"></div>
+    </div>
+</div>
 
             <div class="team-panel red-side" id="panel-red">
                 <div class="freeze-overlay">❄️ FREEZE</div>
